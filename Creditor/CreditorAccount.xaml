@@ -1,4 +1,4 @@
-<Pages:GridBasePage xmlns:Pages="clr-namespace:Uniconta.ClientTools.Page;assembly=ClientTools" 
+<Pages:GridBasePage xmlns:Pages="clr-namespace:Uniconta.ClientTools.Page;assembly=ClientTools"
    xmlns:UC="clr-namespace:UnicontaClient.Pages;assembly=UnicontaPages"
 x:Class="UnicontaClient.Pages.CustomPage.CreditorAccount"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"

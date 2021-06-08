@@ -22,6 +22,8 @@ using System.Collections;
 using Uniconta.ClientTools.Controls;
 
 using UnicontaClient.Pages;
+using AuditFunctions.Helpers;
+
 namespace UnicontaClient.Pages.CustomPage
 {
     public class CreditorAccountGrid : CorasauDataGridClient
@@ -140,11 +142,15 @@ namespace UnicontaClient.Pages.CustomPage
                         EditAll();
                     break;
                 case "AddLine":
-                    dgCreditorAccountGrid.AddRow();
+                    var addLine = dgCreditorAccountGrid.AddRow() as CreditorClient;
+                    AuditFunctionHelper.InsertAuditFields(addLine, api);
                     break;
                 case "CopyRow":
                     if (copyRowIsEnabled)
-                        dgCreditorAccountGrid.CopyRow();
+                    {
+                        var copRow = dgCreditorAccountGrid.CopyRow() as CreditorClient;
+                        AuditFunctionHelper.InsertAuditFields(copRow, api);
+                    }
                     else
                         CopyRecord(selectedItem);
                     break;
@@ -155,10 +161,12 @@ namespace UnicontaClient.Pages.CustomPage
                     Save();
                     break;
                 case "AddRow":
-                    object[] param = new object[2];
-                    param[0] = api;
-                    param[1] = null;
-                    AddDockItem(TabControls.CreditorAccountPage2, param, Uniconta.ClientTools.Localization.lookup("Creditorsaccount"), "Add_16x16.png");
+                    var creditor = Activator.CreateInstance(selectedItem.GetType()) as CreditorClient;
+                    creditor.SetMaster(api.CompanyEntity);
+                    AuditFunctionHelper.InsertAuditFields(creditor, api);
+                    var parms = new object[2] { creditor, false };
+
+                    AddDockItem(TabControls.CreditorAccountPage2, parms, Uniconta.ClientTools.Localization.lookup("Creditorsaccount"), "Add_16x16.png");
                     break;
                 case "EditRow":
                     if (selectedItem != null)
@@ -265,6 +273,7 @@ namespace UnicontaClient.Pages.CustomPage
                 return;
             var creditor = Activator.CreateInstance(selectedItem.GetType()) as CreditorClient;
             CorasauDataGrid.CopyAndClearRowId(selectedItem, creditor);
+            AuditFunctionHelper.InsertAuditFields(creditor, api);
             var parms = new object[2] { creditor, false };
             AddDockItem(TabControls.CreditorAccountPage2, parms, Uniconta.ClientTools.Localization.lookup("Creditorsaccount"), "Add_16x16.png");
         }

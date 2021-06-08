@@ -26,6 +26,10 @@ using Uniconta.ClientTools.Controls;
 using Uniconta.DataModel;
 
 using UnicontaClient.Pages;
+
+using Uniconta.API.System;
+using AuditFunctions.Helpers;
+
 namespace UnicontaClient.Pages.CustomPage
 {
     public class DebtorAccountGrid : CorasauDataGridClient
@@ -164,10 +168,11 @@ namespace UnicontaClient.Pages.CustomPage
                         EditAll();
                     break;
                 case "AddRow":
-                    object[] param = new object[2];
-                    param[0] = api;
-                    param[1] = null;
-                    AddDockItem(TabControls.DebtorAccountPage2, param, Uniconta.ClientTools.Localization.lookup("DebtorAccount"), "Add_16x16.png");
+                    var debtor = Activator.CreateInstance(selectedItem.GetType()) as DebtorClient;
+                    debtor.SetMaster(api.CompanyEntity);
+                    AuditFunctionHelper.InsertAuditFields(debtor, api);
+                    var parms = new object[2] { debtor, false };
+                    AddDockItem(TabControls.DebtorAccountPage2, parms, Uniconta.ClientTools.Localization.lookup("DebtorAccount"), "Add_16x16.png");
                     break;
                 case "EditRow":
                     if (selectedItem != null)
@@ -265,11 +270,15 @@ namespace UnicontaClient.Pages.CustomPage
                         gridRibbon_BaseActions(ActionType);
                     break;
                 case "AddLine":
-                    dgDebtorAccountGrid.AddRow();
+                    var addLine = dgDebtorAccountGrid.AddRow() as DebtorClient;
+                    AuditFunctionHelper.InsertAuditFields(addLine, api);
                     break;
                 case "CopyRow":
                     if (copyRowIsEnabled)
-                        dgDebtorAccountGrid.CopyRow();
+                    {
+                        var copRow = dgDebtorAccountGrid.CopyRow() as DebtorClient;
+                        AuditFunctionHelper.InsertAuditFields(copRow, api);
+                    }
                     else
                         CopyRecord(selectedItem);
                     break;
@@ -322,15 +331,18 @@ namespace UnicontaClient.Pages.CustomPage
             }
         }
 
+
         void CopyRecord(DebtorClient selectedItem)
         {
             if (selectedItem == null)
                 return;
             var debtor = Activator.CreateInstance(selectedItem.GetType()) as DebtorClient;
             CorasauDataGrid.CopyAndClearRowId(selectedItem, debtor);
+            AuditFunctionHelper.InsertAuditFields(debtor,api);
             var parms = new object[2] { debtor, false };
             AddDockItem(TabControls.DebtorAccountPage2, parms, Uniconta.ClientTools.Localization.lookup("DebtorAccount"), "Add_16x16.png");
         }
+
 
 #if !SILVERLIGHT
         async void CreateMandates(IList debtors)
@@ -384,6 +396,8 @@ namespace UnicontaClient.Pages.CustomPage
 
         bool copyRowIsEnabled = false;
         bool editAllChecked;
+        private InvJournalLine dataEntity;
+
         private void EditAll()
         {
             RibbonBase rb = (RibbonBase)localMenu.DataContext;

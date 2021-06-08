@@ -24,6 +24,8 @@ using Uniconta.API.Service;
 using Uniconta.DataModel;
 
 using UnicontaClient.Pages;
+using AuditFunctions.Helpers;
+
 namespace UnicontaClient.Pages.CustomPage
 {
     public class InventoryItemsGrid : CorasauDataGridClient
@@ -261,7 +263,12 @@ namespace UnicontaClient.Pages.CustomPage
                         EditAll();
                     break;
                 case "AddRow":
-                    AddDockItem(TabControls.InventoryItemPage2, api, Uniconta.ClientTools.Localization.lookup("InventoryItems"), "Add_16x16.png");
+                    var invItem = Activator.CreateInstance(selectedItem.GetType()) as InvItemClient;
+                    invItem.SetMaster(api.CompanyEntity);
+                    AuditFunctionHelper.InsertAuditFields(invItem, api);
+                    var parameters = new object[2] { invItem, false };
+
+                    AddDockItem(TabControls.InventoryItemPage2, parameters, Uniconta.ClientTools.Localization.lookup("InventoryItems"), "Add_16x16.png");
                     break;
                 case "EditRow":
                     if (selectedItem != null)
@@ -299,11 +306,15 @@ namespace UnicontaClient.Pages.CustomPage
                         gridRibbon_BaseActions(ActionType);
                     break;
                 case "AddLine":
-                    dgInventoryItemsGrid.AddRow();
+                    var addLine = dgInventoryItemsGrid.AddRow() as InvItemClient;
+                    AuditFunctionHelper.InsertAuditFields(addLine, api);
                     break;
                 case "CopyRow":
                     if (copyRowIsEnabled)
-                        dgInventoryItemsGrid.CopyRow();
+                    {
+                        var copRow = dgInventoryItemsGrid.CopyRow() as InvItemClient;
+                        AuditFunctionHelper.InsertAuditFields(copRow, api);
+                    }
                     else
                         CopyRecord(selectedItem);
                     break;
@@ -397,6 +408,8 @@ namespace UnicontaClient.Pages.CustomPage
             invItem._qtyReserved = 0;
             invItem.HasNotes = false;
             invItem.HasDocs = false;
+          
+            AuditFunctionHelper.InsertAuditFields(invItem, api);
             var parms = new object[2] { invItem, false };
             AddDockItem(TabControls.InventoryItemPage2, parms, Uniconta.ClientTools.Localization.lookup("InventoryItems"), "Add_16x16.png");
         }
