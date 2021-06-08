@@ -273,10 +273,9 @@ namespace UnicontaClient.Pages.CustomPage
                 return;
             var creditor = Activator.CreateInstance(selectedItem.GetType()) as CreditorClient;
             CorasauDataGrid.CopyAndClearRowId(selectedItem, creditor);
-            creditor._Created = DateTime.MinValue;
-            creditor._D2CAccount = null;
             AuditFunctionHelper.InsertAuditFields(creditor, api);
-            AddDockItem(TabControls.CreditorAccountPage2, new object[2] { creditor, IdObject.get(false) }, Uniconta.ClientTools.Localization.lookup("Creditorsaccount"), "Add_16x16.png");
+            var parms = new object[2] { creditor, false };
+            AddDockItem(TabControls.CreditorAccountPage2, parms, Uniconta.ClientTools.Localization.lookup("Creditorsaccount"), "Add_16x16.png");
         }
 
         bool copyRowIsEnabled = false;

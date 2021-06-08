@@ -82,6 +82,13 @@ namespace UnicontaClient.Pages.CustomPage
             this.PreviewKeyDown += RootVisual_KeyDown;
 #endif
             this.BeforeClose += DebtorAccount_BeforeClose;
+
+            //var row = new DebtorClient();
+            //row.SetMaster(api.CompanyEntity);
+            //var UserFieldDef = row.UserFieldDef();
+            //if (UserFieldDef != null)
+            //    UserFieldControl.CreateUserFieldOnPage2(detailControl.layoutItems, UserFieldDef, (RowIndexConverter)this.Resources["RowIndexConverter"], this.api, this, true, null);
+
         }
 
         private void RootVisual_KeyDown(object sender, KeyEventArgs e)
@@ -322,7 +329,7 @@ namespace UnicontaClient.Pages.CustomPage
                     gridRibbon_BaseActions(ActionType);
                     break;
             }
-        }   
+        }
 
 
         void CopyRecord(DebtorClient selectedItem)
@@ -331,10 +338,9 @@ namespace UnicontaClient.Pages.CustomPage
                 return;
             var debtor = Activator.CreateInstance(selectedItem.GetType()) as DebtorClient;
             CorasauDataGrid.CopyAndClearRowId(selectedItem, debtor);
-            debtor._Created = DateTime.MinValue;
-            debtor._D2CAccount = null;
             AuditFunctionHelper.InsertAuditFields(debtor,api);
-            AddDockItem(TabControls.DebtorAccountPage2, new object[2] { debtor, IdObject.get(false) }, Uniconta.ClientTools.Localization.lookup("DebtorAccount"), "Add_16x16.png");
+            var parms = new object[2] { debtor, false };
+            AddDockItem(TabControls.DebtorAccountPage2, parms, Uniconta.ClientTools.Localization.lookup("DebtorAccount"), "Add_16x16.png");
         }
 
 
